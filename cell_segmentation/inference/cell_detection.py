@@ -617,7 +617,7 @@ class CellPostProcessor:
         self.logger.info("Initializing Cell-Postprocessor")
         self.cell_df = pd.DataFrame(cell_list)
         ## save the pd.DataFrame for debugging
-        self.cell_df.to_csv(path+"/cell_df.csv")
+        self.cell_df.to_csv(path / "cell_df.csv")
         self.cell_df = self.cell_df.parallel_apply(convert_coordinates, axis=1)
 
         self.mid_cells = self.cell_df[

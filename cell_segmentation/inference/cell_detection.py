@@ -422,7 +422,7 @@ class CellSegmentationInference:
 
         # post processing
         self.logger.info(f"Detected cells before cleaning: {len(cell_dict_wsi)}")
-        keep_idx = self.post_process_edge_cells(cell_list=cell_dict_wsi)
+        keep_idx = self.post_process_edge_cells(cell_list=cell_dict_wsi, wsipath=wsi.patched_slide_path)
         cell_dict_wsi = [cell_dict_wsi[idx_c] for idx_c in keep_idx]
         cell_dict_detection = [cell_dict_detection[idx_c] for idx_c in keep_idx]
         graph_data["cell_tokens"] = [
@@ -513,7 +513,7 @@ class CellSegmentationInference:
 
         return instance_types, tokens
 
-    def post_process_edge_cells(self, cell_list: List[dict]) -> List[int]:
+    def post_process_edge_cells(self, cell_list: List[dict], wsipath) -> List[int]:
         """Use the CellPostProcessor to remove multiple cells and merge due to overlap
 
         Args:
@@ -530,7 +530,7 @@ class CellSegmentationInference:
         Returns:
             List[int]: List with integers of cells that should be kept
         """
-        cell_processor = CellPostProcessor(cell_list, self.logger)
+        cell_processor = CellPostProcessor(cell_list, self.logger, wsipath)
         cleaned_cells = cell_processor.post_process_cells()
 
         return list(cleaned_cells.index.values)
@@ -598,7 +598,7 @@ class CellSegmentationInference:
 
 
 class CellPostProcessor:
-    def __init__(self, cell_list: List[dict], logger: logging.Logger) -> None:
+    def __init__(self, cell_list: List[dict], logger: logging.Logger, path: str) -> None:
         """POst-Processing a list of cells from one WSI
 
         Args:
@@ -616,6 +616,8 @@ class CellPostProcessor:
         self.logger = logger
         self.logger.info("Initializing Cell-Postprocessor")
         self.cell_df = pd.DataFrame(cell_list)
+        ## save the pd.DataFrame for debugging
+        self.cell_df.to_csv(path+"/cell_df.csv")
         self.cell_df = self.cell_df.parallel_apply(convert_coordinates, axis=1)
 
         self.mid_cells = self.cell_df[

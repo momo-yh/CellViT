@@ -530,8 +530,12 @@ class CellSegmentationInference:
         Returns:
             List[int]: List with integers of cells that should be kept
         """
-        cell_processor = CellPostProcessor(cell_list, self.logger, wsipath)
+        cell_processor = CellPostProcessor(cell_list, self.logger)
         cleaned_cells = cell_processor.post_process_cells()
+
+        ## save the pd.DataFrame for debugging
+        self.logger.info("saved cleaned cells to cell_df.csv")
+        cleaned_cells.to_csv(wsipath / "cell_df.csv")
 
         return list(cleaned_cells.index.values)
 
@@ -598,7 +602,7 @@ class CellSegmentationInference:
 
 
 class CellPostProcessor:
-    def __init__(self, cell_list: List[dict], logger: logging.Logger, path: str) -> None:
+    def __init__(self, cell_list: List[dict], logger: logging.Logger) -> None:
         """POst-Processing a list of cells from one WSI
 
         Args:
@@ -616,8 +620,6 @@ class CellPostProcessor:
         self.logger = logger
         self.logger.info("Initializing Cell-Postprocessor")
         self.cell_df = pd.DataFrame(cell_list)
-        ## save the pd.DataFrame for debugging
-        self.cell_df.to_csv(path / "cell_df.csv")
         self.cell_df = self.cell_df.parallel_apply(convert_coordinates, axis=1)
 
         self.mid_cells = self.cell_df[

@@ -10,5 +10,5 @@ python ./cell_segmentation/inference/cell_detection.py \
   --geojson \
   --batch_size 1 \
   process_wsi \
-  --wsi_path img/he_aligned.ome.tif/he.ome-registered.ome.tif \
-  --patched_slide_path img/cellvit_output/he.ome-registered.ome
+  --wsi_path img/he_aligned.ome.tif/he-registered.ome.tif \
+  --patched_slide_path img/cellvit_output/he-registered.ome
